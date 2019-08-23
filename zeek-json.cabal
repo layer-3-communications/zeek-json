@@ -1,0 +1,97 @@
+cabal-version: 2.2
+name: zeek-json
+version: 0.1.0.0
+-- synopsis:
+-- description:
+homepage: https://github.com/layer-3-communications/zeek-json
+bug-reports: https://github.com/layer-3-communications/zeek-json/issues
+license: BSD-3-Clause
+license-file: LICENSE
+author: Andrew Martin
+maintainer: andrew.thaddeus@gmail.com
+copyright: 2019 Andrew Martin
+category: Data
+extra-source-files: CHANGELOG.md
+
+library
+  exposed-modules:
+    Zeek.Json
+  build-depends:
+    , array-builder
+    , array-chunks
+    , base >=4.12 && <5
+    , base62 >=0.1 && <0.2
+    , byteslice >=0.1 && <0.2
+    , bytesmith >=0.1 && <0.2
+    , bytestring >=0.10.8 && <0.11
+    , chronos >=1.0.5 && <2
+    , ip
+    , json-tokenize
+    , primitive >=0.7 && <0.8
+    , primitive-addr >=0.1 && <0.2
+    , primitive-unlifted >=0.1.2 && <0.2
+    , smith
+    , text-short >=0.1.3 && <0.2
+    , unpacked-maybe
+    , unpacked-maybe-numeric
+    , unpacked-maybe-text
+    , wide-word >=0.1.0.8 && <0.2
+  hs-source-dirs: src
+  ghc-options: -Wall -O2
+  default-language: Haskell2010
+
+test-suite test
+  default-language: Haskell2010
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test, common
+  main-is: Main.hs
+  other-modules: Examples
+  build-depends:
+    , array-builder
+    , array-chunks
+    , base >=4.12 && <5
+    , zeek-json
+    , byteslice >=0.1.2
+    , bytestring
+    , chronos
+    , ip
+    , json-tokenize
+    , unpacked-maybe-numeric
+    , neat-interpolation
+    , primitive
+    , tasty
+    , tasty-hunit
+    , text
+    , text-short
+    , unpacked-maybe
+    , unpacked-maybe-text
+    , wide-word
+
+benchmark bench
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules: Examples
+  hs-source-dirs:
+      bench
+    , common
+  build-depends:
+    , aeson >=1.4.4
+    , array-builder
+    , array-chunks
+    , base
+    , byteslice
+    , bytestring
+    , chronos
+    , gauge
+    , ip
+    , neat-interpolation
+    , primitive
+    , text
+    , text-short
+    , unpacked-maybe
+    , unpacked-maybe-numeric
+    , unpacked-maybe-text
+    , wide-word
+    , zeek-json
+  ghc-options: -O2 -Wall
+  default-language: Haskell2010
