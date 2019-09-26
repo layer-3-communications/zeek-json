@@ -5,6 +5,7 @@
 module Examples
   ( encodedKerberosA
   , encodedKerberosB
+  , encodedDnsC
   , kerberosA
   , kerberosAttrsA
   , kerberosB
@@ -18,7 +19,7 @@ module Examples
 
 import Zeek.Json (Kerberos(..),Attribute(..),TextField(..))
 import Zeek.Json (UidField(..),BoolField(..),TimeField(..))
-import Zeek.Json (IpField(..),PortField(..))
+import Zeek.Json (IpField(..),Word16Field(..))
 import Chronos (Date(..),DayOfMonth(..),Year(..),TimeOfDay(..),Datetime(..))
 import Control.Monad.ST (runST)
 import Data.Builder (Builder)
@@ -82,6 +83,40 @@ encodedKerberosB = pin $ shortByteStringToByteArray $ toShort $ encodeUtf8
       "till": "2037-09-13T02:48:05.000000Z",
       "ts": "2019-08-11T12:59:05.870765Z",
       "uid": "CiY9yhn4ZFrMgi7Re"
+    }
+  |]
+
+encodedDnsC :: ByteArray
+encodedDnsC = pin $ shortByteStringToByteArray $ toShort $ encodeUtf8
+  [text|
+    {
+      "@path": "dns",
+      "@sensor": "corelight",
+      "@timestamp": "2019-08-11T13:02:53.529992Z",
+      "AA": true,
+      "RA": true,
+      "RD": true,
+      "TC": false,
+      "TTLs": [ 3600,7200,300, 1200 ],
+      "Z": 0,
+      "answers": ["192.0.2.231" ,"192.0.2.232","192.0.2.233", "192.0.2.234"],
+      "id.orig_h": "192.0.2.11",
+      "id.orig_p": 33550,
+      "id.resp_h": "192.0.2.25",
+      "id.resp_p": 53,
+      "proto": "udp",
+      "qclass": 1,
+      "qclass_name": "C_INTERNET",
+      "qtype": 1,
+      "qtype_name": "A",
+      "query": "foo.example.com",
+      "rcode": 0,
+      "rcode_name": "NOERROR",
+      "rejected": false,
+      "rtt": 0.0056,
+      "trans_id": 53269,
+      "ts": "2019-08-11T13:02:53.524392Z",
+      "uid": "Cv2WQgF86tV38UAS8"
     }
   |]
 
@@ -185,11 +220,11 @@ kerberosToAttributes (Kerberos
   <> 
   (BDR.singleton (IpAttribute IdOrigHost id_orig_h))
   <> 
-  (BDR.singleton (PortAttribute IdOrigPort id_orig_p))
+  (BDR.singleton (Word16Attribute IdOrigPort id_orig_p))
   <> 
   (BDR.singleton (IpAttribute IdRespHost id_resp_h))
   <> 
-  (BDR.singleton (PortAttribute IdRespPort id_resp_p))
+  (BDR.singleton (Word16Attribute IdRespPort id_resp_p))
   <> 
   (TSM.maybe mempty (BDR.singleton . TextAttribute NewTicket) new_ticket)
   <> 

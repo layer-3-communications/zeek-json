@@ -41,12 +41,16 @@ main = defaultMain
         (whnf (\x -> Zeek.decode (Bytes.fromByteArray x)) E.encodedKerberosA)
     , bench "Kerberos-B"
         (whnf (\x -> Zeek.decode (Bytes.fromByteArray x)) E.encodedKerberosB)
+    , bench "DNS-C"
+        (whnf (\x -> Zeek.decode (Bytes.fromByteArray x)) E.encodedDnsC)
     ]
   , bgroup "aeson"
     [ bench "Kerberos-A"
         (whnf aesonDecode E.encodedKerberosA)
     , bench "Kerberos-B"
         (whnf aesonDecode E.encodedKerberosB)
+    , bench "DNS-C"
+        (whnf aesonDecode E.encodedDnsC)
     ]
   ]
 
