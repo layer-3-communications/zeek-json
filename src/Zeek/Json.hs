@@ -155,7 +155,7 @@ data Attribute
   = TextAttribute TextField {-# UNPACK #-} !ShortText
   | UidAttribute UidField {-# UNPACK #-} !Word128
   | BoolAttribute BoolField !Bool
-  | TimeAttribute TimeField !Datetime -- intentionally not unpacked
+  | TimeAttribute TimeField !Datetime -- intentionally not unpacked. 'decodeDatetime', defined in this same module, is certain to box its result since it calls 'parseByteArray', which in turn calls 'runRW#'.
   | IpAttribute IpField {-# UNPACK #-} !IP
   | IpsAttribute IpsField {-# UNPACK #-} !(PrimArray IPv6)
   | Word64sAttribute Word64sField {-# UNPACK #-} !(PrimArray Word64)
@@ -407,7 +407,7 @@ parserKerberos = do
       , success, renewable, server_cert_subject, id_orig_p, id_resp_p
       , request_type, service, error_msg, ts
       , id_resp_h, id_orig_h, uid, till, from, client_cert_fuid
-      , server_cert_fuid, new_ticket 
+      , server_cert_fuid, new_ticket
       }
 
 uidToken :: e -> Parser Token e s Word128
@@ -965,7 +965,7 @@ writeTextArray !(MutableUnliftedArray marr) !ix !str =
 byteArrayToShortByteString :: ByteArray -> BSS.ShortByteString
 byteArrayToShortByteString (PM.ByteArray x) = BSS.SBS x
 
-shortByteStringToByteArray :: BSS.ShortByteString -> ByteArray 
+shortByteStringToByteArray :: BSS.ShortByteString -> ByteArray
 shortByteStringToByteArray (BSS.SBS x) = PM.ByteArray x
 
 -- This is unsafe. It does not validate that the bytes are a
