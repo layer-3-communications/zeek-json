@@ -35,8 +35,6 @@ import Control.Monad.ST (ST)
 import Data.Bool (bool)
 import Data.Bytes.Types (Bytes)
 import Data.Chunks (Chunks)
-import Data.Json.Tokenize (JsonTokenizeException)
-import Data.Json.Tokenize (Token)
 import Data.Maybe.Unpacked.Text.Short (MaybeShortText)
 import Data.Parser (Parser)
 import Data.Primitive (ByteArray,PrimArray)
@@ -47,7 +45,8 @@ import Data.Text.Short (ShortText)
 import Data.WideWord (Word128)
 import GHC.Exts (Addr#)
 import GHC.Word (Word8(W8#),Word16,Word64)
-import Net.Types (IPv4,IP(IP),IPv6(IPv6))
+import Json.Token (TokenException,Token)
+import Net.Types (IP(IP),IPv6(IPv6))
 
 import qualified Chronos
 import qualified Data.Builder.ST as Builder
@@ -56,7 +55,6 @@ import qualified Data.Bytes as Bytes
 import qualified Data.Bytes.Parser as BP
 import qualified Data.Bytes.Parser.Latin as Latin
 import qualified Data.Number.Scientific as SCI
-import qualified Data.Json.Tokenize as J
 import qualified Data.Maybe.Unpacked as M
 import qualified Data.Maybe.Unpacked.Numeric.Word128 as MW128
 import qualified Data.Maybe.Unpacked.Numeric.Word16 as MW16
@@ -69,6 +67,7 @@ import qualified Data.Text.Short as TS
 import qualified Data.Text.Short.Unsafe as TS
 import qualified Data.Word.Base62 as Base62
 import qualified GHC.Exts as Exts
+import qualified Json.Token as J
 import qualified Net.IP as IP
 import qualified Net.IPv4 as IPv4
 
@@ -235,7 +234,7 @@ data Scratchpad s = Scratchpad
   }
 
 data ZeekException
-  = Lexing JsonTokenizeException
+  = Lexing TokenException
   | Parsing ZeekParsingException
   deriving stock (Show)
 
@@ -310,8 +309,9 @@ errorThunk = error "Zeek.Json: mistake was made"
 decode :: Bytes -> Either ZeekException (Chunks Attribute)
 decode b = case J.decode b of
   Left e -> Left (Lexing e)
-  Right tokens -> case P.parse parserAttributes tokens of
-    P.Success k _ _ -> Right k
+  Right tokens -> case P.parseSmallArray parserAttributes tokens of
+    -- TODO: should we use the length?
+    P.Success (P.Slice _ _ k) -> Right k
     P.Failure e -> Left (Parsing e)
 
 parserAttributes :: Parser Token ZeekParsingException s (Chunks Attribute)
@@ -333,8 +333,9 @@ parserAttributes = do
 decodeKerberos :: Bytes -> Either ZeekException Kerberos
 decodeKerberos b = case J.decode b of
   Left e -> Left (Lexing e)
-  Right tokens -> case P.parse parserKerberos tokens of
-    P.Success k _ _ -> Right k
+  Right tokens -> case P.parseSmallArray parserKerberos tokens of
+    -- TODO: should we use the length for anything?
+    P.Success (P.Slice _ _ k) -> Right k
     P.Failure e -> Left (Parsing e)
 
 newKerberosScratchPad :: ST s (Scratchpad s)
@@ -423,13 +424,12 @@ timeToken e = P.any e >>= \case
     Just w -> pure w
   _ -> P.fail e
 
--- This currently only handles ipv4 addresses. Fix this.
+-- Recognizes both IPv4 and IPv6 formats.
 ip :: e -> Parser Token e s Word128
 ip e = P.any e >>= \case
-  J.String str -> case IPv4.decodeShort str of
+  J.String str -> case IP.decodeShort str of
     Nothing -> P.fail e
-    Just addr -> case IP.fromIPv4 addr of
-      IP (IPv6 w) -> pure w
+    Just (IP (IPv6 w)) -> pure w
   _ -> P.fail e
 
 word64s ::
@@ -979,7 +979,7 @@ shortTextToByteArray = shortByteStringToByteArray . TS.toShortByteString
 
 decodeDatetime :: ShortText -> Maybe Datetime
 decodeDatetime str = case BP.parseByteArray parserDatetime (shortTextToByteArray str) of
-  BP.Success datetime remaining -> case remaining of
+  BP.Success (BP.Slice _ remaining datetime) -> case remaining of
     0 -> Just datetime
     _ -> Nothing
   BP.Failure _ -> Nothing

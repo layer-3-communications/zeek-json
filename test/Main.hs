@@ -12,10 +12,10 @@ import Test.Tasty (defaultMain,testGroup,TestTree)
 import Test.Tasty.HUnit ((@=?),assertFailure)
 
 import qualified Data.Bytes as Bytes
-import qualified Data.Json.Tokenize as J
 import qualified Data.List as L
 import qualified Examples as E
 import qualified GHC.Exts as Exts
+import qualified Json.Token as J
 import qualified Net.IP as IP
 import qualified Test.Tasty.HUnit as THU
 import qualified Zeek.Json as Zeek

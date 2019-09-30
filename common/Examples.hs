@@ -22,20 +22,17 @@ import Zeek.Json (UidField(..),BoolField(..),TimeField(..))
 import Zeek.Json (IpField(..),Word16Field(..))
 import Chronos (Date(..),DayOfMonth(..),Year(..),TimeOfDay(..),Datetime(..))
 import Control.Monad.ST (runST)
-import Data.Builder (Builder)
 import Data.Chunks (Chunks)
 import Data.ByteString.Short (ShortByteString,toShort)
 import Data.Primitive (ByteArray)
 import Data.Text.Encoding (encodeUtf8)
-import Data.Text.Short (ShortText)
 import Data.Word (Word16)
 import Data.WideWord (Word128)
 import NeatInterpolation (text)
-import Net.Types (IPv4,IP(..),IPv6(..))
+import Net.Types (IP(..))
 
 import qualified Chronos
 import qualified Data.Builder as BDR
-import qualified Net.IPv4 as IPv4
 import qualified Net.IP as IP
 import qualified Data.Maybe.Unpacked.Text.Short as TSM
 import qualified Data.Maybe.Unpacked.Numeric.Word128 as MW128
